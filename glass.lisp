@@ -15,13 +15,18 @@
 
 (in-package #:glass)
 
-(defgeneric acquire-credential (mech-type principal &key)
+(defgeneric acquire-credential (mech-type &key principal)
   (:documentation "Acquire credentials for the principal named. Returns CREDENTIALS, for input into INITIALIZE-SECURITY-CONTEXT. c.f. GSS_Acquire_cred.
 
 MECH-TYPE ::= symbol naming the authentication mechamism
 PRINCIPAL ::= the security principal you are requesting credentials for.
 "))
 
+;; NOTE: this function MUST return an InitialContextToken structure, i.e. an ASN.1 DER encoded structure. 
+;; This is is defined in the specification.
+;; Q: we have the necessary serializer in cerberus, should we provide it here instead? 
+;; A: that is hard to do, because the necessary codes are rather tightly coupled (it's implemented by the 
+;; cerberus DER-serializer). Moving it here would not be simple.
 (defgeneric initialize-security-context (context &key)
   (:documentation "Returns a security context to be sent to the application server. c.f. GSS_Init_sec_context"))
 
@@ -33,16 +38,35 @@ c.f. GSS_Accept_sec_context
 "))
 
 ;; Get_MIC()
-(defgeneric get-mic (context message &key))
+(defgeneric get-mic (context message &key)
+  (:documentation "Compute a checksum over the message. C.f. GSS_GetMIC.
+
+MESSAGE ::= octet array containing the plaintext.
+
+Returns an octet array."))
 
 ;; GSS_VerifyMIC()
-(defgeneric verify-mic (context message message-token &key))
+(defgeneric verify-mic (context message message-token &key)
+  (:documentation "Verify the checksum. c.f. GSS_VerifyMIC
+
+MESSAGE ::= octet array containing the original message that was checksum'ed.
+MESSAGE-TOKEN ::= the checksum, i.e. result of calling GET-MIC.
+
+Returns T if verified."))
 
 ;; ;; GSS_Wrap()
-(defgeneric wrap (context message &key))
+(defgeneric wrap (context message &key)
+  (:documentation "Encrypt the message. c.f. GSS_Wrap
+MESSAGE ::= octet array containing the plaintext message
 
+Returns an octet array contining the encrypted message."))
 
 ;; ;; GSS_Unwrap()
-(defgeneric unwrap (context-handle buffer &key))
+(defgeneric unwrap (context-handle buffer &key)
+  (:documentation "Decrypt the message. c.f. GSS_Unwrap
+
+BUFFER ::= the wrapped message, as returned by WRAP. 
+
+Returns the decrypted plaintext."))
 
 
