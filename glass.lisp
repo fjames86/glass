@@ -11,15 +11,18 @@
 	   #:get-mic
 	   #:verify-mic
 	   #:wrap
-	   #:unwrap))
+	   #:unwrap
+	   #:gss-error))
 
 (in-package #:glass)
 
+;; this should return a "credential handle" for input into initialize-security-context or accept-security-context
+;; but somehow the "credentials" need to be input into this function.
 (defgeneric acquire-credential (mech-type &key principal)
   (:documentation "Acquire credentials for the principal named. Returns CREDENTIALS, for input into INITIALIZE-SECURITY-CONTEXT. c.f. GSS_Acquire_cred.
 
 MECH-TYPE ::= symbol naming the authentication mechamism
-PRINCIPAL ::= the security principal you are requesting credentials for.
+PRINCIPAL ::= the security principal you are requesting credentials for. NIL assumes default.
 "))
 
 ;; NOTE: this function MUST return an InitialContextToken structure, i.e. an ASN.1 DER encoded structure. 
@@ -27,6 +30,11 @@ PRINCIPAL ::= the security principal you are requesting credentials for.
 ;; Q: we have the necessary serializer in cerberus, should we provide it here instead? 
 ;; A: that is hard to do, because the necessary codes are rather tightly coupled (it's implemented by the 
 ;; cerberus DER-serializer). Moving it here would not be simple.
+
+;; The context should either be an initial context returned from ACQUIRE-CREDENTIAL or a context that 
+;; has been returned from a prior call to INITIALIZE-SECURITY-CONTEXT. In the later case, this implies
+;; validating a reply from the application server (to verify its identity). The received token should also 
+;; be passed in via a keyword parameter.
 (defgeneric initialize-security-context (context &key)
   (:documentation "Returns a security context to be sent to the application server. c.f. GSS_Init_sec_context"))
 

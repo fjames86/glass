@@ -4,8 +4,8 @@
 (asdf:defsystem :glass
   :name "frpc"
   :author "Frank James <frank.a.james@gmail.com>"
-  :description "General Lisp Security System API."
+  :description "General Lisp API Security System."
   :license "MIT"
   :components
-  ((:file "glass")))
-
+  ((:file "glass")
+   (:file "errors" :depends-on ("glass"))))
