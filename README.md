@@ -39,8 +39,8 @@ CL-USER> (gss:get-mic *client-context* #(1 2 3 4))
 CL-USER> (gss:verify-mic *server-context* (gss:get-mic *client-context* #(1 2 3 4)))
 
 ;; encrypt message
-CL-USER> (gss:wrap *server-context* #(1 2 3 4))
-CL-USER> (gss:unwrap *client-context* #(1 2 3 4))
+CL-USER> (gss:wrap *client-context* #(1 2 3 4))
+CL-USER> (gss:unwrap *server-context* (gss:wrap *client-context* #(1 2 3 4)))
 
 ```
 
