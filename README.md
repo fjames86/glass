@@ -13,28 +13,34 @@ Currently the only security system implementing these functions is [cerberus](ht
 which provides Kerberos v5 support.
 
 ```
-CL-USER> (defvar *context* 
-                 (gss:acquire-credential :kerberos 
-                                         :principal (cerberus:principal "host" :instance "host.name.com" :type :srv-host) 
-                                         :kdc-address "10.1.1.1" 
-                                         :username "username" :password "1234" :realm "REALM"))
-*CONTEXT*
-CL-USER> (defvar *buffer* (gss:initialize-security-context *context*))
-*BUFFER*
-;; send the buffer to the application server
+;; client
+CL-USER> (cerberus:logon-user "username" "password" "realm" :kdc-address "10.1.1.1")
+CL-USER> (defvar *credentials* 
+                 (gss:acquire-credentials :kerberos 
+                                         "host/host.name.com@realm"))
+*CREDENTIALS*
+CL-USER> (multiple-value-bind (context buffer) (gss:initialize-security-context *context* :mutual t)
+           (defvar *client-context* context)
+           (defvar *buffer* buffer))
 
-CL-USER> (defvar *context2* 
-                 (gss:acquire-credential :kerberos :username "Administrator" :password "1234" :realm "REALM"))
-*CONTEXT2*
-CL-USER> (gss:accept-security-context *context2* *buffer*)
+;; send the buffer to the application server
+CL-USER> (defvar *server-credentials* (gss:acquire-credentials :kerberos nil))
+*SERVER-CREDENTIALS*
+CL-USER> (multiple-value-bind (context response-buffer) (gss:accept-security-context *server-credentials* *buffer*)
+            (defvar *server-context* context)
+            (defvar *response-buffer* response-buffer))
+
+;; send the response buffer back to the client and pass to INITIALIZE-SECURITY-CONTEXT so the 
+;; client can authenticate the server
+CL-USER> (gss:initialize-security-context *client-context* :buffer *response-buffer*)
 
 ;; compute checksums
-CL-USER> (gss:get-mic *context* #(1 2 3 4))
-CL-USER> (gss:verify-mic *context2* (gss:get-mic *context* #(1 2 3 4)))
+CL-USER> (gss:get-mic *client-context* #(1 2 3 4))
+CL-USER> (gss:verify-mic *server-context* (gss:get-mic *client-context* #(1 2 3 4)))
 
 ;; encrypt message
-CL-USER> (gss:wrap *context* #(1 2 3 4))
-CL-USER> (gss:unwrap *context2* #(1 2 3 4))
+CL-USER> (gss:wrap *server-context* #(1 2 3 4))
+CL-USER> (gss:unwrap *client-context* #(1 2 3 4))
 
 ```
 
