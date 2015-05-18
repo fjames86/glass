@@ -35,10 +35,10 @@ PRINCIPAL ::= the security principal you are requesting credentials for. NIL ass
 ;; has been returned from a prior call to INITIALIZE-SECURITY-CONTEXT. In the later case, this implies
 ;; validating a reply from the application server (to verify its identity). The received token should also 
 ;; be passed in via a keyword parameter.
-(defgeneric initialize-security-context (context &key)
+(defgeneric initialize-security-context (credentials &key)
   (:documentation "Returns a security context to be sent to the application server. c.f. GSS_Init_sec_context"))
 
-(defgeneric accept-security-context (context buffer &key)
+(defgeneric accept-security-context (credentials buffer &key)
   (:documentation "CREDENTIALS are credentials for the server principal. CONTEXT is the packed 
 buffer sent from the client. It should be as returned from INITIALIZE-SECURITY-CONTEXT.
 
