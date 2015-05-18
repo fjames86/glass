@@ -5,7 +5,7 @@
 (defpackage #:glass
   (:use #:cl)
   (:nicknames #:gss)
-  (:export #:acquire-credential
+  (:export #:acquire-credentials
 	   #:initialize-security-context
 	   #:accept-security-context
 	   #:get-mic
@@ -18,7 +18,7 @@
 
 ;; this should return a "credential handle" for input into initialize-security-context or accept-security-context
 ;; but somehow the "credentials" need to be input into this function.
-(defgeneric acquire-credential (mech-type &key principal)
+(defgeneric acquire-credentials (mech-type principal &key)
   (:documentation "Acquire credentials for the principal named. Returns CREDENTIALS, for input into INITIALIZE-SECURITY-CONTEXT. c.f. GSS_Acquire_cred.
 
 MECH-TYPE ::= symbol naming the authentication mechamism
