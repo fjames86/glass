@@ -6,6 +6,7 @@
   :author "Frank James <frank.a.james@gmail.com>"
   :description "General Lisp API Security System."
   :license "MIT"
+  :version "1.0.1"
   :components
   ((:file "glass")
    (:file "errors" :depends-on ("glass"))))
