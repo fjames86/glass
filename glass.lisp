@@ -12,6 +12,7 @@
 	   #:verify-mic
 	   #:wrap
 	   #:unwrap
+	   #:context-principal-name
 	   #:gss-error))
 
 (in-package #:glass)
@@ -78,3 +79,6 @@ BUFFER ::= the wrapped message, as returned by WRAP.
 Returns the decrypted plaintext."))
 
 
+;; something like GSS_Display_Name
+(defgeneric context-principal-name (context &key)
+  (:documentation "Returns a string which represents the name of the principal to which is authenticated by this context."))
