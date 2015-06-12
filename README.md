@@ -15,8 +15,7 @@ This package provides a set of generic functions. Systems which provide security
 methods for these generics.
 
 ### 2.1 Kerberos
-Currently the only security system implementing these functions is [cerberus](https://github.com/fjames86/cerberus),
-which provides Kerberos v5 support.
+Kerberos support is provided by [cerberus](https://github.com/fjames86/cerberus).
 
 ```
 ;; client
@@ -50,6 +49,12 @@ CL-USER> (gss:wrap *client-context* #(1 2 3 4))
 CL-USER> (gss:unwrap *server-context* (gss:wrap *client-context* #(1 2 3 4)))
 
 ```
+
+### 2.2 NTLM 
+NTLM support is provided by [ntlm](https://github.com/fjames86/ntlm).
+
+### 2.3 SPNEGO (Negotiate)
+Negotiate support is provided by [spnego](https://github.com/fjames86/spnego).
 
 ## 3. License
 Licensed under the terms of the MIT license.
