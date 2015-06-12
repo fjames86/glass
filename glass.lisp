@@ -1,6 +1,7 @@
 ;;;; Copyright (c) Frank James 2015 <frank.a.james@gmail.com>
 ;;;; This code is licensed under the MIT license.
 
+;;; This file defines a set of generic functions which security systems should provide methods for.
 
 (defpackage #:glass
   (:use #:cl)
@@ -20,10 +21,14 @@
 ;; this should return a "credential handle" for input into initialize-security-context or accept-security-context
 ;; but somehow the "credentials" need to be input into this function.
 (defgeneric acquire-credentials (mech-type principal &key)
-  (:documentation "Acquire credentials for the principal named. Returns CREDENTIALS, for input into INITIALIZE-SECURITY-CONTEXT. c.f. GSS_Acquire_cred.
+  (:documentation "Acquire credentials for the principal named. Returns CREDENTIALS, for input into INITIALIZE-SECURITY-CONTEXT and ACCEPT-SECURITY-CONTEXT. 
+c.f. GSS_Acquire_cred.
 
-MECH-TYPE ::= symbol naming the authentication mechamism
-PRINCIPAL ::= the security principal you are requesting credentials for. NIL assumes default.
+MECH-TYPE ::= symbol naming the authentication mechamism.
+
+PRINCIPAL ::= the name of the principal you are requesting credentials for. NIL assumes default.
+
+Returns an opaque credential object to be used in subsequent calls.
 "))
 
 ;; NOTE: this function MUST return an InitialContextToken structure, i.e. an ASN.1 DER encoded structure. 
@@ -36,14 +41,31 @@ PRINCIPAL ::= the security principal you are requesting credentials for. NIL ass
 ;; has been returned from a prior call to INITIALIZE-SECURITY-CONTEXT. In the later case, this implies
 ;; validating a reply from the application server (to verify its identity). The received token should also 
 ;; be passed in via a keyword parameter.
-(defgeneric initialize-security-context (credentials &key)
-  (:documentation "Returns a security context to be sent to the application server. c.f. GSS_Init_sec_context"))
+(defgeneric initialize-security-context (context-or-credentials &key)
+  (:documentation "Returns a security context to be sent to the application server. c.f. GSS_Init_sec_context.
 
-(defgeneric accept-security-context (credentials buffer &key)
-  (:documentation "CREDENTIALS are credentials for the server principal. CONTEXT is the packed 
-buffer sent from the client. It should be as returned from INITIALIZE-SECURITY-CONTEXT.
+On the first call CONTEXT-OR-CREDENTIALS should be the result of the initial call to ACQUIRE-CREDENTIALS.
 
-c.f. GSS_Accept_sec_context
+On subsequent calls, CONTEXT-OR-CREDENTIALS should be the context returned from the previous call to INITIALIZE-SECURITY-CONTEXT.
+
+Returns (values context buffer) where context is an opaque object to be used in subsequent calls to this or other functions. Buffer 
+is either an opaque octet-vector, which should be sent to the server, or nil if the context has been completed.
+
+May signal conditions of type GSS-ERROR."))
+
+(defgeneric accept-security-context (context-or-credentials buffer &key)
+  (:documentation "For the server to accept a security context from the client.
+
+On the first call to this function, CONTEXT-OR-CREDENTIALS should be a credential object as returned from the initial
+call to ACQUIRE-CREDENTIALS. Subsequent calls CONTEXT-OR-CREDENTIALS should be the context returned from the previous call
+to this function.
+
+BUFFER is the opaque octet vector sent from the client.
+
+Returns (values context response-buffer) where CONTEXT is the context to be used in subsequent calls to this function or other
+glass functions. RESPONSE-BUFFER is either an opaque octet vector to be sent back to the client, or nil if the context has been completed.
+
+May signal GSS-ERROR if authentication fails.
 "))
 
 ;; Get_MIC()
@@ -81,4 +103,6 @@ Returns the decrypted plaintext."))
 
 ;; something like GSS_Display_Name
 (defgeneric context-principal-name (context &key)
-  (:documentation "Returns a string which represents the name of the principal to which is authenticated by this context."))
+  (:documentation "Returns a string which represents the name of the principal to which is authenticated by this context. 
+This function should be used by servers wishing to get some information on the identity of the client.
+"))
