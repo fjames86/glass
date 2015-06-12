@@ -3,8 +3,7 @@ General Lisp Authentication Security Services (glass) is a Common Lisp GSS-compa
 generic functions which systems providing authentication services should specialize. Users wishing to consume
 these services should use these rather than functions exported directly from the providing packages. 
 
-Currently the only system to provide these methods is [cerberus](https://github.com/fjames86/cerberus), which provides 
-a Kerberos v5 implementation.
+The supported authentication systems are Kerberos, NTLM and SPNEGO (Negotiate). 
 
 ## 1. Introduction
 The GSSAPI specifies a generalized mechanism for defining security service APIs. It is the most common way 
@@ -51,10 +50,13 @@ CL-USER> (gss:unwrap *server-context* (gss:wrap *client-context* #(1 2 3 4)))
 ```
 
 ### 2.2 NTLM 
-NTLM support is provided by [ntlm](https://github.com/fjames86/ntlm).
+NTLM support is provided by [ntlm](https://github.com/fjames86/ntlm). NTLM is a legacy protocol
+and is not recommended for use over unsecure networks, nevertheless it is often required for use with
+various Microsoft tools.
 
 ### 2.3 SPNEGO (Negotiate)
-Negotiate support is provided by [spnego](https://github.com/fjames86/spnego).
+Negotiate support is provided by [spnego](https://github.com/fjames86/spnego). This system is essentially a
+wrapper around NTLM and Kerberos, with an initial negotiation stage to determine a mutually agreeable system.
 
 ## 3. License
 Licensed under the terms of the MIT license.
