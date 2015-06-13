@@ -48,8 +48,9 @@ On the first call CONTEXT-OR-CREDENTIALS should be the result of the initial cal
 
 On subsequent calls, CONTEXT-OR-CREDENTIALS should be the context returned from the previous call to INITIALIZE-SECURITY-CONTEXT.
 
-Returns (values context buffer) where context is an opaque object to be used in subsequent calls to this or other functions. Buffer 
-is either an opaque octet-vector, which should be sent to the server, or nil if the context has been completed.
+Returns (values context buffer continue-needed) where context is an opaque object to be used in subsequent calls to this or other functions. Buffer 
+is either an opaque octet-vector, which should be sent to the server, or nil if the context has been completed. Continue needed is
+a boolean indicating whether further calls to this function need to made before the authentication is complete.
 
 May signal conditions of type GSS-ERROR."))
 
@@ -62,8 +63,9 @@ to this function.
 
 BUFFER is the opaque octet vector sent from the client.
 
-Returns (values context response-buffer) where CONTEXT is the context to be used in subsequent calls to this function or other
+Returns (values context response-buffer continue-needed) where CONTEXT is the context to be used in subsequent calls to this function or other
 glass functions. RESPONSE-BUFFER is either an opaque octet vector to be sent back to the client, or nil if the context has been completed.
+CONTINUE-NEEDED is a boolean indicating whether further calls to this function are required before authentication has completed.
 
 May signal GSS-ERROR if authentication fails.
 "))
